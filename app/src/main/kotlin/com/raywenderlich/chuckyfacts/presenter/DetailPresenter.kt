@@ -2,12 +2,11 @@ package com.raywenderlich.chuckyfacts.presenter
 
 import com.raywenderlich.chuckyfacts.DetailContract
 import com.raywenderlich.chuckyfacts.entity.Joke
-import com.raywenderlich.chuckyfacts.view.activities.MainActivity
 
 class DetailPresenter(var view: DetailContract.View?): DetailContract.Presenter {
 
     override fun backButtonClicked() {
-        view?.getRouterInstance()?.backTo(MainActivity.TAG)
+        view?.getRouterInstance()?.exit()
     }
 
     override fun onViewCreated(joke: Joke) {
