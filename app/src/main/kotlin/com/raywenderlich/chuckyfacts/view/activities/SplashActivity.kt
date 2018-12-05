@@ -25,14 +25,63 @@ package com.raywenderlich.chuckyfacts.view.activities
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import com.raywenderlich.chuckyfacts.BaseApplication
+import com.raywenderlich.chuckyfacts.SplashContract
+import com.raywenderlich.chuckyfacts.presenter.SplashPresenter
+import ru.terrakok.cicerone.Navigator
+import ru.terrakok.cicerone.Router
+import ru.terrakok.cicerone.commands.Command
+import ru.terrakok.cicerone.commands.Forward
 
-class SplashActivity : AppCompatActivity() {
+class SplashActivity : AppCompatActivity(), SplashContract.View {
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    // Start 'MainActivity'
-    startActivity(Intent(this, MainActivity::class.java))
-    // close splash activity
-    finish()
-  }
+    private val router: Router by lazy { BaseApplication.INSTANCE.cicerone.router }
+
+    var presenter: SplashContract.Presenter? = null
+    private val navigator: Navigator? by lazy {
+        object : Navigator {
+            override fun applyCommand(command: Command) {   // 2
+                if (command is Forward) {
+                    forward(command)
+                }
+            }
+
+            private fun forward(command: Forward) {
+                when (command.screenKey) {
+                    MainActivity.TAG ->
+                        startActivity(Intent(this@SplashActivity, MainActivity::class.java))   // 4
+                    else ->
+                        Log.e("Cicerone", "Unknown screen: " + command.screenKey)
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        presenter = SplashPresenter(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter?.onViewCreated()
+        BaseApplication.INSTANCE.cicerone.navigatorHolder.setNavigator(navigator)
+    }
+
+    override fun finishView() {
+        finish()
+    }
+
+    override fun onPause() {
+        BaseApplication.INSTANCE.cicerone.navigatorHolder.removeNavigator()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter?.onDestroy()
+    }
+
+    override fun getRouterInstance(): Router = router
 }

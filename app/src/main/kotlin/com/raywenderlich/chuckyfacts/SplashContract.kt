@@ -22,15 +22,18 @@
 
 package com.raywenderlich.chuckyfacts
 
+import ru.terrakok.cicerone.Router
+
 interface SplashContract {
-  interface View {
-    fun finishView()
-  }
+    interface View {
+        fun finishView()
+        fun getRouterInstance(): Router
+    }
 
-  interface Presenter {
-    // Model updates
-    fun onViewCreated()
+    interface Presenter {
+        // Model updates
+        fun onViewCreated()
 
-    fun onDestroy()
-  }
+        fun onDestroy()
+    }
 }
